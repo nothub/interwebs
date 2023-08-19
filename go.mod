@@ -1,3 +1,3 @@
 module github.com/nothub/interwebs
 
-go 1.20
+go 1.21
