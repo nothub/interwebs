@@ -13,6 +13,25 @@ var (
 	ErrInvalidMimeParam = errors.New("invalid mime param")
 )
 
+type Type struct {
+	Main   string
+	Sub    string
+	Params Params
+}
+
+func (t *Type) String() string {
+	return fmt.Sprintf("%s/%s", t.Main, t.Sub)
+}
+
+func (t *Type) StringFull() string {
+	s := t.String()
+	for k, v := range t.Params {
+		// TODO: quoted values
+		s = s + ";" + k + "=" + v
+	}
+	return s
+}
+
 type Params map[string]string
 
 func (p Params) isAscii() bool {
@@ -63,10 +82,10 @@ const (
 
 var specials = []rune{'!', '#', '$', '%', '&', '\'', '*', '+', '-', '.', '^', '_', '`', '|', '~'}
 
-func Parse(raw string) (mime string, params Params, err error) {
+func Parse(raw string) (mt Type, err error) {
 	// TODO: verify with https://mimesniff.spec.whatwg.org/#parsing-a-mime-type
 
-	params = NewParams()
+	mt.Params = NewParams()
 
 	for i, s := range strings.Split(raw, ";") {
 		if i == 0 {
@@ -75,17 +94,20 @@ func Parse(raw string) (mime string, params Params, err error) {
 		}
 		k, v, err := parseParam(s)
 		if err != nil {
-			return "", Params{}, err
+			return Type{}, err
 		}
-		params[k] = v
+		mt.Params[k] = v
 	}
 
 	main, sub, err := parseType(raw)
 	if err != nil {
-		return "", Params{}, err
+		return Type{}, err
 	}
 
-	return main + "/" + sub, params, nil
+	mt.Main = main
+	mt.Sub = sub
+
+	return mt, nil
 }
 
 func NewParams() (params Params) {
