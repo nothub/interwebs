@@ -34,18 +34,26 @@ func (t *Type) StringFull() string {
 
 type Params map[string]string
 
-func (p Params) isAscii() bool {
-	return strings.ToUpper(p["charset"]) == "US-ASCII"
+func (p Params) IsAscii() bool {
+	val, ok := p["charset"]
+	if !ok {
+		return true
+	}
+	return strings.ToUpper(val) == "US-ASCII"
 }
 
-func (p Params) isUtf8() bool {
+func (p Params) IsUtf8() bool {
 	return strings.ToUpper(p["charset"]) == "UTF-8"
 }
 
-func (p Params) quality() (q float64, err error) {
-	q, err = strconv.ParseFloat(p["q"], 64)
+func (p Params) Quality() (q float64, err error) {
+	val, ok := p["q"]
+	if !ok {
+		return 1.0, nil
+	}
+	q, err = strconv.ParseFloat(val, 64)
 	if err != nil {
-		return q, err
+		return 0.0, err
 	}
 	return q, nil
 }
@@ -85,7 +93,7 @@ var specials = []rune{'!', '#', '$', '%', '&', '\'', '*', '+', '-', '.', '^', '_
 func Parse(raw string) (mt Type, err error) {
 	// TODO: verify with https://mimesniff.spec.whatwg.org/#parsing-a-mime-type
 
-	mt.Params = NewParams()
+	mt.Params = make(map[string]string)
 
 	for i, s := range strings.Split(raw, ";") {
 		if i == 0 {
@@ -108,13 +116,6 @@ func Parse(raw string) (mt Type, err error) {
 	mt.Sub = sub
 
 	return mt, nil
-}
-
-func NewParams() (params Params) {
-	params = make(map[string]string)
-	params["charset"] = "US-ASCII"
-	params["q"] = "1.0"
-	return params
 }
 
 func parseType(s string) (main string, sub string, err error) {
