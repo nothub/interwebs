@@ -70,20 +70,20 @@ func Test(t *testing.T) {
 			expected: "text/b",
 		},
 	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			mt, err := Negotiate(firefoxHeader, test.provided)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			mt, err := Negotiate(tc.header, tc.provided)
 			if err != nil {
 				t.Logf("error=%++q\n", err)
 				t.Fail()
 			}
-			if mt != test.expected {
+			if mt != tc.expected {
 				t.Fail()
 			}
 			if t.Failed() {
-				t.Logf("header:   %++q\n", test.header)
-				t.Logf("provided: %++q\n", test.provided)
-				t.Logf("expected: %++q\n", test.expected)
+				t.Logf("header:   %++q\n", tc.header)
+				t.Logf("provided: %++q\n", tc.provided)
+				t.Logf("expected: %++q\n", tc.expected)
 				t.Logf("actual:   %++q\n", mt)
 			}
 		})
