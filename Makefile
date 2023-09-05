@@ -5,6 +5,8 @@ check:
 	go vet $(PKGS)
 	go test $(PKGS)
 
-.PHONY: clean
-clean:
+.PHONY: tidy
+tidy:
 	go clean $(PKGS)
+	go fmt $(PKGS)
+	go mod tidy
