@@ -11,8 +11,8 @@ import (
 type m map[string]item
 type Cache struct {
 	m
-	mx   sync.Mutex
-	dura time.Duration
+	mx  sync.Mutex
+	ttl time.Duration
 }
 
 type item struct {
@@ -24,11 +24,11 @@ func (item item) expired() bool {
 	return item.until.After(time.Now())
 }
 
-func New(dura time.Duration) (cache *Cache) {
+func New(ttl time.Duration) (cache *Cache) {
 	return &Cache{
-		m:    make(map[string]item),
-		mx:   sync.Mutex{},
-		dura: dura,
+		m:   make(map[string]item),
+		mx:  sync.Mutex{},
+		ttl: ttl,
 	}
 }
 
@@ -37,7 +37,7 @@ func (ca *Cache) Put(id string, value any) {
 	defer ca.mx.Unlock()
 
 	ca.m[id] = item{
-		until: time.Now().Add(ca.dura),
+		until: time.Now().Add(ca.ttl),
 		value: value,
 	}
 }
