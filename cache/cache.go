@@ -5,32 +5,40 @@ import (
 	"time"
 )
 
-type m map[string]item
-type Cache struct {
-	m
+type item[T any] struct {
+	until time.Time
+	value *T
+}
+
+func (item item[T]) expired() bool {
+	return item.until.Before(time.Now())
+}
+
+type Cache[T any] struct {
+	m   map[string]item[T]
 	mx  sync.Mutex
 	ttl time.Duration
 }
 
-func New(ttl time.Duration) (cache *Cache) {
-	return &Cache{
-		m:   make(map[string]item),
+func New[T any](ttl time.Duration) (cache *Cache[T]) {
+	return &Cache[T]{
+		m:   make(map[string]item[T]),
 		mx:  sync.Mutex{},
 		ttl: ttl,
 	}
 }
 
-func (ca *Cache) Put(id string, value any) {
+func (ca *Cache[T]) Put(id string, value *T) {
 	ca.mx.Lock()
 	defer ca.mx.Unlock()
 
-	ca.m[id] = item{
+	ca.m[id] = item[T]{
 		until: time.Now().Add(ca.ttl),
 		value: value,
 	}
 }
 
-func (ca *Cache) Get(id string) (value any) {
+func (ca *Cache[T]) Get(id string) (value *T) {
 	ca.mx.Lock()
 	defer ca.mx.Unlock()
 
@@ -44,10 +52,10 @@ func (ca *Cache) Get(id string) (value any) {
 		return nil
 	}
 
-	return item
+	return item.value
 }
 
-func (ca *Cache) Scrub() {
+func (ca *Cache[T]) Scrub() {
 	ca.mx.Lock()
 	defer ca.mx.Unlock()
 

@@ -5,7 +5,26 @@ import (
 	"time"
 )
 
-func Test_item_expired(t *testing.T) {
+func Test_Cache_expiry(t *testing.T) {
+	c := New[bool](10 * time.Millisecond)
+	var v = true
+
+	c.Put("foo", &v)
+	time.Sleep(1 * time.Millisecond)
+	foo := c.Get("foo")
+	if foo == nil {
+		t.Fatal("item expired but should not be")
+	}
+
+	c.Put("bar", &v)
+	time.Sleep(10 * time.Millisecond)
+	bar := c.Get("bar")
+	if bar != nil {
+		t.Fatal("item not expired but should be")
+	}
+}
+
+func Test_item_expiry(t *testing.T) {
 	for _, d := range []struct {
 		validForDura time.Duration
 		shouldExpire bool
@@ -19,7 +38,7 @@ func Test_item_expired(t *testing.T) {
 			shouldExpire: false,
 		},
 	} {
-		it := item{
+		it := item[any]{
 			until: time.Now().Add(d.validForDura),
 		}
 		time.Sleep(1 * time.Millisecond)
