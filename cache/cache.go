@@ -5,23 +5,11 @@ import (
 	"time"
 )
 
-// example usage:
-// var cache = cache.New(24 * time.Hour)
-
 type m map[string]item
 type Cache struct {
 	m
 	mx  sync.Mutex
 	ttl time.Duration
-}
-
-type item struct {
-	until time.Time
-	value any
-}
-
-func (item item) expired() bool {
-	return item.until.After(time.Now())
 }
 
 func New(ttl time.Duration) (cache *Cache) {
