@@ -10,13 +10,14 @@ func Test_Cache_expiry(t *testing.T) {
 	var v = true
 
 	c.Put("foo", &v)
-	time.Sleep(1 * time.Millisecond)
+	c.Put("bar", &v)
+
+	time.Sleep(3 * time.Millisecond)
 	foo := c.Get("foo")
 	if foo == nil {
 		t.Fatal("item expired but should not be")
 	}
 
-	c.Put("bar", &v)
 	time.Sleep(10 * time.Millisecond)
 	bar := c.Get("bar")
 	if bar != nil {
