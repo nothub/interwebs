@@ -55,9 +55,11 @@ func TrustRealIP(h http.Handler) http.Handler {
 // StripRealIP removes common real-ip headers from request headers.
 func StripRealIP(h http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		r.Header.Del("X-Forwarded-For")
-		r.Header.Del("True-Client-IP")
-		r.Header.Del("X-Real-IP")
+		// legit real-ip headers
+		r.Header.Del(XForwardedFor)
+		r.Header.Del(TrueClientIP)
+		r.Header.Del(XRealIP)
+		// some other headers
 		r.Header.Del("X-Client-IP")
 		r.Header.Del("X-Host")
 		r.Header.Del("X-Originating-IP")
