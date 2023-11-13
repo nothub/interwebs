@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+const XForwardedFor = "X-Forwarded-For"
+const TrueClientIP = "True-Client-IP"
+const XRealIP = "X-Real-IP"
+
 // TrustRealIP tries to set the request remote address to the
 // original requesters ip by reading the "X-Forwarded-For",
 // "True-Client-IP" or "X-Real-IP" header.
@@ -15,11 +19,11 @@ import (
 func TrustRealIP(h http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 
-		if r.Header.Get("X-Forwarded-For") != "" {
+		if r.Header.Get(XForwardedFor) != "" {
 			// X-Forwarded-For holds a list of ip's separated by commas.
 			// First element is the original requester.
 			// Last element is the most recent proxy.
-			l := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
+			l := strings.Split(r.Header.Get(XForwardedFor), ",")
 			if len(l) > 0 {
 				if ip := net.ParseIP(l[0]); ip != nil {
 					r.RemoteAddr = ip.String()
@@ -28,15 +32,15 @@ func TrustRealIP(h http.Handler) http.Handler {
 			}
 		}
 
-		if r.Header.Get("True-Client-IP") != "" {
-			if ip := net.ParseIP(r.Header.Get("True-Client-IP")); ip != nil {
+		if r.Header.Get(TrueClientIP) != "" {
+			if ip := net.ParseIP(r.Header.Get(TrueClientIP)); ip != nil {
 				r.RemoteAddr = ip.String()
 				goto DONE
 			}
 		}
 
-		if r.Header.Get("X-Real-IP") != "" {
-			if ip := net.ParseIP(r.Header.Get("X-Real-IP")); ip != nil {
+		if r.Header.Get(XRealIP) != "" {
+			if ip := net.ParseIP(r.Header.Get(XRealIP)); ip != nil {
 				r.RemoteAddr = ip.String()
 				goto DONE
 			}
