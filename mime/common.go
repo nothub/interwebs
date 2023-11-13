@@ -14,7 +14,6 @@ const (
 	// OctetStream is the default type for non-text content.
 	// An unknown file type should use this type.
 	OctetStream = "application/octet-stream"
-	Unknown     = OctetStream
 	Json        = "application/json"
 	JsonLd      = "application/ld+json"
 	Pdf         = "application/pdf"
