@@ -15,7 +15,7 @@ import (
 func TrustRealIP(h http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 
-		if _, ok := r.Header["X-Forwarded-For"]; ok {
+		if r.Header.Get("X-Forwarded-For") != "" {
 			// X-Forwarded-For holds a list of ip's separated by commas.
 			// First element is the original requester.
 			// Last element is the most recent proxy.
@@ -28,14 +28,14 @@ func TrustRealIP(h http.Handler) http.Handler {
 			}
 		}
 
-		if _, ok := r.Header["True-Client-IP"]; ok {
+		if r.Header.Get("True-Client-IP") != "" {
 			if ip := net.ParseIP(r.Header.Get("True-Client-IP")); ip != nil {
 				r.RemoteAddr = ip.String()
 				goto DONE
 			}
 		}
 
-		if _, ok := r.Header["X-Real-IP"]; ok {
+		if r.Header.Get("X-Real-IP") != "" {
 			if ip := net.ParseIP(r.Header.Get("X-Real-IP")); ip != nil {
 				r.RemoteAddr = ip.String()
 				goto DONE
