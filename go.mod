@@ -1,4 +1,4 @@
-module github.com/nothub/interwebs
+module hub.lol/interwebs
 
 go 1.21
 
